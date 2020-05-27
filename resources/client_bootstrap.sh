@@ -28,7 +28,24 @@ client {
         retry_join = ["provider=gce zone_pattern=europe-west4-a tag_value=server"]
         retry_interval = "15s"
     }
+
+    host_volume "minecraft_world" {
+        path      = "/mnt/minecraft/world"
+        read_only = false
+    }
+
+    host_volume "minecraft_config" {
+        path      = "/mnt/minecraft/config"
+        read_only = false
+    }
 }
 EOF
+
+# NFS
+apt-get update && apt-get install -y nfs-common
+mkdir -p /mnt/minecraft/world
+mkdir -p /mnt/minecraft/config
+echo "${filestore_instance}:/hashicraft /mnt/minecraft nfs defaults 0 0" >> /etc/fstab
+mount -a
 
 systemctl restart nomad
